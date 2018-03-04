@@ -15,7 +15,7 @@
 #define DEFAULT_BAUDRATE 9600                             //default baudrate, 8n1 setting
 #define DEFAULT_SLAVE_ID 247                              //default slave id is 247
 
-#define MB_SETTING_SIZE 5                                //number of bytes stored in eeprom for modbus
+#define MB_SETTING_SIZE 5                                 //number of bytes stored in eeprom for modbus
 
 #define MESSAGE_LENGTH 0x28                               //total buffer, max 40 characters, also max response length
 
@@ -23,15 +23,15 @@
 
 const uint16_t REGION_START[6] {0x0001,                   //discrete output coils, read write
                                 0x2711,                   //discrete input contacts, read only
+                                0x9C41,                   //output holding registers, read write                                
                                 0x7531,                   //input registers, read only
-                                0x9C41,                   //output holding registers, read write
                                 0x0001,                   //discrete output coils, entry for writing
                                 0x9C41};                  //output holding registers, entry for writing
 
 #define REGION_OUTPUT_COIL_START REGION_START[0x00]       //output coil region start
 #define REGION_DISCRETE_INPUT_START REGION_START[0x01]    //discrete input region start
-#define REGION_INPUT_REGISTER_START REGION_START[0x02]    //input register region start
-#define REGION_HOLDING_REGISTER_START REGION_START[0x03]  //holding register region start
+#define REGION_INPUT_REGISTER_START REGION_START[0x03]    //input register region start
+#define REGION_HOLDING_REGISTER_START REGION_START[0x02]  //holding register region start
 #define REGION_END(start) (start+REGION_RANGE)            //return inserted region + range as ending
 
 typedef struct{                                           //data structure used in this file
