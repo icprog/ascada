@@ -24,7 +24,7 @@
         uint16_t configLoaded:1;
       };
       uint16_t status = 0;              
-    };    
+    };
     uint16_t alarms[ALARM_WORD_CNT] = {0};      
     union{
       uint8_t settings[CL_SETTING_SIZE]={0};
