@@ -68,8 +68,8 @@ ReadFuncPtr ReadReg(uint16_t address,uint16_t* value){    //read a register, ret
          * [3] unexpected shutdown bit 0 same as register 0x54 bit 1/2/3
          * [4] unexpected shutdown bit 1
          * [5] unexpected shutdown bit 2
-         * [6] config loaded 
-         * [7] alarm available
+         * [6] alarm available
+         * [7] config loaded 
          * [8]
          * [9]
          * [A]
@@ -79,17 +79,19 @@ ReadFuncPtr ReadReg(uint16_t address,uint16_t* value){    //read a register, ret
          * [E]
          * [F]
          */
-      }else if(address==0x09)
+      }else if(address==0x09){
+        *value=cl_ds.settings[0];
+      }else if(address==0x0A)
         *value=ALARM_BIT_CNT;                           //read number of alarm bits, can be converted to nr of bytes
-      else if((address>=0x0A)&&(address<(0x0A+ALARM_WORD_CNT)))
-      { 
-        address=address-0x0A;
+      else if((address>=0x0B)&&(address<(0x0B+ALARM_WORD_CNT)))
+      {
+        address=address-0x0B;
         *value=cl_ds.alarms[address];
       }
-      else if(address==(0x0A+ALARM_WORD_CNT))
-        *value=millis()&0xFFFF;          
       else if(address==(0x0B+ALARM_WORD_CNT))
-        *value=(millis()>>16);      
+        *value=millis()&0xFFFF;          
+      else if(address==(0x0C+ALARM_WORD_CNT))
+        *value=(millis()>>16);
     }
   }
   return result;                                          //return error code, if any
@@ -153,8 +155,11 @@ ExecuteFuncPtr ExecuteFunction(uint8_t function){
   switch(function){
     case 0x50:      
       result=clStart();
-      if((result==EXCEPTION_NONE) && cl_ds.defaultOffline)
-        mbSetup(mb_ds.baudrate,mb_ds.slaveId);
+      if((result==EXCEPTION_NONE) && cl_ds.defaultOffline){
+        if(ConfigFromEeprom(0,MB_SETTING_SIZE,mb_ds.settings))
+          mbSetup(mb_ds.baudrate,mb_ds.slaveId);
+      }
+      break;
     case 0x51:
       return clPause();
     case 0x52:
@@ -163,30 +168,30 @@ ExecuteFuncPtr ExecuteFunction(uint8_t function){
   return result;
 }
 //--------------------------------------------------------------------------------------
-void setup(){  
+void setup(){         
   if(CheckEepromForMagic())
-  {
+  {    
     if(ConfigFromEeprom(0,MB_SETTING_SIZE,mb_ds.settings))
     {
       ConfigFromEeprom(MB_SETTING_SIZE,CL_SETTING_SIZE,cl_ds.settings);  
-      cl_ds.configLoaded=true;      
+      cl_ds.configLoaded=true;
     }
   }
+
   mbReadRegister=ReadReg; 
   mbReadBit=ReadBit; 
   mbWriteRegister=WriteReg;
   mbWriteBit=WriteBit;
   if(cl_ds.configLoaded)
-  {
+  { 
     clSetup();
-    if(!cl_ds.startRunning && cl_ds.defaultOffline)
+    if((!cl_ds.startRunning) && cl_ds.defaultOffline)    
       mbSetup(DEFAULT_BAUDRATE,DEFAULT_SLAVE_ID);
     else
       mbSetup(mb_ds.baudrate,mb_ds.slaveId);
-    cl_ds.isRunning=cl_ds.startRunning;    
+    cl_ds.isRunning=cl_ds.startRunning;
   }else{
-    mbSetup(DEFAULT_BAUDRATE,DEFAULT_SLAVE_ID);
-    
+    mbSetup(DEFAULT_BAUDRATE,DEFAULT_SLAVE_ID);    
   }
   cl_ds.unexpectedShutdown=CheckResetRegister();  
 }
