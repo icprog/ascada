@@ -198,7 +198,7 @@ uint8_t HandleRequest(){                                  //handling a complete 
                 result=EXCEPTION_SLAVE_DEVICE_FAILURE;    //can't execute, slave error
               break;                                      //and done
             case 6:                                       //write holding register (word)
-              if((*mbWriteBit)!=NULL){                    //check me writing bits function
+              if(mbWriteRegister!=NULL){                  //check me writing bits function
                 result=(*mbWriteRegister)(mb_ds.address.val,mb_ds.value.val);
                 if(result==EXCEPTION_NONE)                //on success
                   SendBuffer(mb_ds.msg,mb_ds.msgPtr);     //return the request
