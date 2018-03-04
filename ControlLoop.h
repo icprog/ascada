@@ -7,6 +7,8 @@
   #define ALARM_WORD_CNT 0x10
   #define ALARM_BIT_CNT (ALARM_WORD_CNT*16)
 
+  #define CL_SETTING_SIZE 1
+  
   #define HALTED_NONE 0
   #define HALTED_HALTED 1
   #define HALTED_PAUSED 2
@@ -22,8 +24,15 @@
         uint16_t configLoaded:1;
       };
       uint16_t status = 0;              
+    };    
+    uint16_t alarms[ALARM_WORD_CNT] = {0};      
+    union{
+      uint8_t settings[CL_SETTING_SIZE]={0};
+      struct{
+        uint8_t startRunning:1;
+        uint8_t defaultOffline:1;
+      };
     };
-    uint16_t alarms[ALARM_WORD_CNT] = {0};
   } cl_t;
 
   extern cl_t cl_ds;
