@@ -3,7 +3,7 @@
 cl_t cl_ds;
 
 uint8_t clSetup(){
-  return 0;
+  return EXCEPTION_NONE;
 }
 
 uint8_t clLoop(){
@@ -17,15 +17,17 @@ uint8_t clLoop(){
 }
 
 uint8_t clStart(){
-  if(!cl_ds.isRunning){
-    if(cl_ds.halted==HALTED_NONE || cl_ds.halted==HALTED_PAUSED){
+  uint8_t result=EXCEPTION_NEGATIVE_ACKNOWLEDGE;
+  if(cl_ds.configLoaded && !cl_ds.isRunning)
+  {
+    if(cl_ds.halted==HALTED_NONE || cl_ds.halted==HALTED_PAUSED)
+    {
       cl_ds.halted=HALTED_NONE;
       cl_ds.isRunning=true;
-      return EXCEPTION_NONE;
-    }else
-      return EXCEPTION_NEGATIVE_ACKNOWLEDGE;
+      result=EXCEPTION_NONE;
+    }
   }
-  return EXCEPTION_NONE;
+  return result;
 }
 
 uint8_t clStop(){
