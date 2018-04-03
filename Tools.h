@@ -11,9 +11,10 @@
   #define EXCEPTION_ACKNOWLEDGE 0x05                        //received request, couldn't finish on time
   #define EXCEPTION_SLAVE_DEVICE_BUSY 0x06                  //can't execute request at the moment
   #define EXCEPTION_NEGATIVE_ACKNOWLEDGE 0x07               //can't acknowledge request
+  #define EXCEPTION_NOT_RUNNING 0x08                        //can't do stuff, because not in run
 
-  #define MAGIC_NUMBER 0xC369
-  #define MAGIC_ADDRESS 0x00
+  #define MAGIC_NUMBER 0xC369                               //eeprom value used to check if eeprom is set
+  #define MAGIC_ADDRESS 0x00                                //eeprom address to read
 
   #define SET_REGISTER(addr,value) ((*(volatile uint8_t *)addr)=value)
   #define GET_REGISTER(addr) (*(volatile uint8_t *)addr)    //return register value
