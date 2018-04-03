@@ -23,7 +23,7 @@
 
 const uint16_t REGION_START[6] {0x0001,                   //discrete output coils, read write
                                 0x2711,                   //discrete input contacts, read only
-                                0x9C41,                   //output holding registers, read write                                
+                                0x9C41,                   //output holding registers, read write
                                 0x7531,                   //input registers, read only
                                 0x0001,                   //discrete output coils, entry for writing
                                 0x9C41};                  //output holding registers, entry for writing
