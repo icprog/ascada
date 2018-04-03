@@ -51,3 +51,22 @@ uint8_t clPause(){
   return EXCEPTION_NEGATIVE_ACKNOWLEDGE;  
 }
 
+ReadFuncPtr clReadReg(uint16_t address,uint16_t* value){
+  uint8_t result=EXCEPTION_INVALID_ADDRESS;
+  return result;
+}
+
+ReadFuncPtr clReadBit(uint16_t address,uint16_t* value){
+  uint8_t result=EXCEPTION_INVALID_ADDRESS;
+  return result;
+}
+
+WriteFuncPtr clWriteReg(uint16_t address,uint16_t value){
+  uint8_t result=EXCEPTION_INVALID_ADDRESS;
+  return result;
+}
+
+WriteFuncPtr clWriteBit(uint16_t address,uint16_t value){
+  uint8_t result=EXCEPTION_INVALID_ADDRESS;
+  return result;
+}
