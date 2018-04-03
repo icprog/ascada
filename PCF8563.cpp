@@ -12,8 +12,11 @@
 
 PCF8563::PCF8563(void)
 {
-	Wire.begin();
-	Rtcc_Addr = RTCC_R>>1;	
+}
+
+void PCF8563::Setup(){
+  Wire.begin();
+  Rtcc_Addr = RTCC_R>>1;  
 }
 
 void PCF8563::initClock()

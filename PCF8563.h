@@ -1,29 +1,3 @@
-/*****
- *  NAME
- *    External Real Time Clock support routines
- *  AUTHOR
- *    Joe Robertson, jmr
- *    orbitalair@bellsouth.net
- *    
- *  CREATION DATE
- *    1/2/10,  init - built off of pic rtc code
- *  NOTES
- *  HISTORY
- *    1/2/10  ported to arduino compiler, jmr
- *    2/14/10 added 3 world date formats, jmr
- *    28/02/2012 A. Pasotti
- *            fixed a bug in RTCC_ALARM_AF,
- *            added a few (not really useful) methods
- *    12/26/12 added version method to be able to track builds. jmr
- *             fix for arduino 1.0.1. Wire.
- *    
- *  TODO
- *
- ******
- *  Robodoc embedded documentation.
- *  http://www.xs4all.nl/~rfsber/Robo/robodoc.html
- */
-
 #ifndef PCF8563_H
 #define PCFf8563_H
 
@@ -117,6 +91,7 @@ private:
 public:
 	PCF8563();
 
+  void Setup();
 	void initClock();		/* zero out all values, disable all alarms */
 	void clearStatus();	/* set both status bytes to zero */
 
