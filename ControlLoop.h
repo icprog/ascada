@@ -43,4 +43,8 @@
   uint8_t clStop();
   uint8_t clPause();
   
+  ReadFuncPtr clReadReg(uint16_t address,uint16_t* value);
+  ReadFuncPtr clReadBit(uint16_t address,uint16_t* value);
+  WriteFuncPtr clWriteReg(uint16_t address,uint16_t value);
+  WriteFuncPtr clWriteBit(uint16_t address,uint16_t value);
 #endif
