@@ -1,8 +1,12 @@
 #include "ControlLoop.h"
-#include "Arduino.h"        
+#include "Arduino.h"
+#include "PCF8563.h"
+      
 cl_t cl_ds;
+PCF8563 rtc;
 
 uint8_t clSetup(){
+  rtc.Setup();
   return EXCEPTION_NONE;
 }
 
@@ -70,3 +74,4 @@ WriteFuncPtr clWriteBit(uint16_t address,uint16_t value){
   uint8_t result=EXCEPTION_INVALID_ADDRESS;
   return result;
 }
+
