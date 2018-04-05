@@ -2,7 +2,7 @@
 #define CONTROLLOOP_BLIB_H
 
   #include <stdint.h>
-  #include "Tools.h"
+  #include "Ascada.h"
   
   #define ALARM_WORD_CNT 0x10
   #define ALARM_BIT_CNT (ALARM_WORD_CNT*16)
@@ -14,8 +14,8 @@
   #define HALTED_PAUSED 2
   #define HALTED_STOPPED 3
   
-  typedef struct {  
-    union{  
+  typedef struct {
+    union{
       struct{
         uint16_t isRunning:1;
         uint16_t halted:2;
@@ -48,3 +48,4 @@
   WriteFuncPtr clWriteReg(uint16_t address,uint16_t value);
   WriteFuncPtr clWriteBit(uint16_t address,uint16_t value);
 #endif
+
