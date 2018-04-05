@@ -1,5 +1,5 @@
-#ifndef TOOLSBLIB_H
-#define TOOLSBLIB_H  
+#ifndef ASCADA_H
+#define ASCADA_H  
 
   #include <stdint.h>
 
@@ -17,7 +17,7 @@
   #define MAGIC_ADDRESS 0x00                                //eeprom address to read
 
   #define SET_REGISTER(addr,value) ((*(volatile uint8_t *)addr)=value)
-  #define GET_REGISTER(addr) (*(volatile uint8_t *)addr)    //return register value
+  #define GET_REGISTER(addr) (*(volatile uint8_t *)addr)    //return register value  
   
   typedef union{
     uint8_t buf[2];
@@ -45,3 +45,4 @@
   bool CheckEepromForMagic();
   uint8_t CheckResetRegister();
 #endif
+
