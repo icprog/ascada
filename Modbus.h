@@ -10,7 +10,7 @@
 #ifndef MODBUSBLIB_H
 #define MODBUSBLIB_H
 
-#include "Tools.h"                                        //universal defintions
+#include "Ascada.h"                                       //universal defintions
 
 #define DEFAULT_BAUDRATE 9600                             //default baudrate, 8n1 setting
 #define DEFAULT_SLAVE_ID 247                              //default slave id is 247
@@ -21,12 +21,12 @@
 
 #define REGION_RANGE 0x270E                               //size of a region
 
-const uint16_t REGION_START[6] {0x0001,                   //discrete output coils, read write
-                                0x2711,                   //discrete input contacts, read only
-                                0x9C41,                   //output holding registers, read write
-                                0x7531,                   //input registers, read only
-                                0x0001,                   //discrete output coils, entry for writing
-                                0x9C41};                  //output holding registers, entry for writing
+const uint16_t REGION_START[6] PROGMEM {0x0001,           //discrete output coils, read write
+                                        0x2711,           //discrete input contacts, read only
+                                        0x9C41,           //output holding registers, read write
+                                        0x7531,           //input registers, read only
+                                        0x0001,           //discrete output coils, entry for writing
+                                        0x9C41};          //output holding registers, entry for writing
 
 #define REGION_OUTPUT_COIL_START REGION_START[0x00]       //output coil region start
 #define REGION_DISCRETE_INPUT_START REGION_START[0x01]    //discrete input region start
@@ -57,14 +57,14 @@ typedef struct{                                           //data structure used 
       uint32_t baudrate;                                  //baudrate
       uint8_t slaveId;                                    //slave id used
     };                                                    
-  };                                                        
-} mb_t;                                                   //ds is short for data structure
+  };    
 
-extern WriteFuncPtr mbWriteBit;                           //writing bits function
-extern WriteFuncPtr mbWriteRegister;                      //writing register function
-extern ReadFuncPtr mbReadBit;                             //reading a bit
-extern ReadFuncPtr mbReadRegister;                        //reading a register
-extern ExecuteFuncPtr mbExecuteFunction;                  //execute given function 
+  WriteFuncPtr WriteBit;                                  //writing bits function
+  WriteFuncPtr WriteRegister;                             //writing register function
+  ReadFuncPtr ReadBit;                                    //reading a bit
+  ReadFuncPtr ReadRegister;                               //reading a register
+  ExecuteFuncPtr ExecuteFunction;                         //execute given function 
+} mb_t;                                                   //ds is short for data structure
 
 extern mb_t mb_ds;                                        //modbus data structure
 uint8_t mbSetup(uint32_t baudrate=DEFAULT_BAUDRATE, uint8_t slaveId=DEFAULT_SLAVE_ID);
