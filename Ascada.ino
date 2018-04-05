@@ -202,7 +202,7 @@ ExecuteFuncPtr ExecuteFunction(uint8_t function)
       if ((result==EXCEPTION_NONE)&&cl_ds.defaultOffline)
       {
         if (ConfigFromEeprom(0, MB_SETTING_SIZE, mb_ds.settings))
-          mb_ds.mbSetup(mb_ds.baudrate, mb_ds.slaveId);
+          mbSetup(mb_ds.baudrate, mb_ds.slaveId);
       }
       break;
     case 0x51:
@@ -223,22 +223,22 @@ void setup()
       cl_ds.configLoaded=true;
     }
   }
-  mb_ds.mbReadRegister=ReadReg;
-  mb_ds.mbReadBit=ReadBit;
-  mb_ds.mbWriteRegister=WriteReg;
-  mb_ds.mbWriteBit=WriteBit;
+  mb_ds.ReadRegister=ReadReg;
+  mb_ds.ReadBit=ReadBit;
+  mb_ds.WriteRegister=WriteReg;
+  mb_ds.WriteBit=WriteBit;
   if (cl_ds.configLoaded)
   {
     clSetup();
     if ((!cl_ds.startRunning)&&cl_ds.defaultOffline)
-      mb_ds.mbSetup(DEFAULT_BAUDRATE, DEFAULT_SLAVE_ID);
+      mbSetup(DEFAULT_BAUDRATE, DEFAULT_SLAVE_ID);
     else
-      mb_ds.mbSetup(mb_ds.baudrate, mb_ds.slaveId);
+      mbSetup(mb_ds.baudrate, mb_ds.slaveId);
     cl_ds.isRunning=cl_ds.startRunning;
   }
   else
   {
-    mb_ds.mbSetup(DEFAULT_BAUDRATE, DEFAULT_SLAVE_ID);
+    mbSetup(DEFAULT_BAUDRATE, DEFAULT_SLAVE_ID);
   }
   cl_ds.unexpectedShutdown=CheckResetRegister();
 }
