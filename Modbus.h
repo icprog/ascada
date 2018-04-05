@@ -10,7 +10,7 @@
 #ifndef MODBUSBLIB_H
 #define MODBUSBLIB_H
 
-#include "Tools.h"                                        //universal defintions
+#include "Ascada.h"                                       //universal defintions
 
 #define DEFAULT_BAUDRATE 9600                             //default baudrate, 8n1 setting
 #define DEFAULT_SLAVE_ID 247                              //default slave id is 247
@@ -34,6 +34,57 @@ const uint16_t REGION_START[6] {0x0001,                   //discrete output coil
 #define REGION_HOLDING_REGISTER_START REGION_START[0x02]  //holding register region start
 #define REGION_END(start) (start+REGION_RANGE)            //return inserted region + range as ending
 
+class ModbusRTU{
+private:
+protected:
+public:
+uint8_t GetExpectedLength();
+uint8_t InitSerial(uint32_t baudrate);
+void SendBuffer(uint8_t* buf,uint16_t len);
+void HandleException(uint8_t exceptionCode=0x01);
+uint8_t HandleBroadcast();
+uint8_t ReadRegisters();
+uint8_t ReadBits();
+uint8_t HandleMisc();
+uint8_t HandleRequest();
+
+  union16_t address;                                      //address used in requests goes here, because msb/lsb flip
+  union16_t value;                                        //value used in request goes here, because of flipped msb/lsb
+  uint16_t silence;                                       //silence period in timer 0 ticks (4us per tick)
+  volatile uint8_t silence_cnt;                           //silence amount of ticks executed at this moment
+  uint8_t silence_ticks;                                  //silence amount of ticks needed to complete silence period
+  uint8_t msgPtr = 0;                                     //ptr to know where we are with the message
+  uint8_t expectedLength = 0;                             //expected length of request
+	
+	union{
+    uint8_t msg[MESSAGE_LENGTH] = {0};                    //message buffer, for both request and response   
+    struct{                                               //request message block      
+      uint8_t msgSlave;                                   //request slave id
+      uint8_t msgFunc;                                    //request function
+    };
+  };  
+  
+	union{                                                  //settings block start, save able data
+    uint8_t settings[MB_SETTING_SIZE]={0};                //settings as a byte array
+    struct{                                               
+      uint32_t baudrate;                                  //baud-rate
+      uint8_t slaveId;                                    //slave id used
+    };                                                    
+  };  	
+//  ModbusRTU();
+//	~ModbusRTU();
+  uint8_t mbSetup(uint32_t baudrate=DEFAULT_BAUDRATE, 
+									uint8_t slaveId=DEFAULT_SLAVE_ID);
+  WriteFuncPtr mbWriteBit;                           			//writing bits function
+  WriteFuncPtr mbWriteRegister;                      			//writing register function
+  ReadFuncPtr mbReadBit;                             			//reading a bit
+  ReadFuncPtr mbReadRegister;                        			//reading a register
+  ExecuteFuncPtr mbExecuteFunction;                  			//execute given function   
+};
+
+extern ModbusRTU mb_ds;
+
+/*
 typedef struct{                                           //data structure used in this file
   union16_t address;                                      //address used in requests goes here, because msb/lsb flip
   union16_t value;                                        //value used in request goes here, because of flipped msb/lsb
@@ -51,14 +102,14 @@ typedef struct{                                           //data structure used 
     };
   };                                                        
   
-  union{                                                  //settings block start, saveable data
+  union{                                                  //settings block start, save able data
     uint8_t settings[MB_SETTING_SIZE]={0};                //settings as a byte array
     struct{                                               
-      uint32_t baudrate;                                  //baudrate
+      uint32_t baudrate;                                  //baud-rate
       uint8_t slaveId;                                    //slave id used
     };                                                    
   };                                                        
-} mb_t;                                                   //ds is short for data structure
+} mb_t;                                                   //mosbus data structure
 
 extern WriteFuncPtr mbWriteBit;                           //writing bits function
 extern WriteFuncPtr mbWriteRegister;                      //writing register function
@@ -68,5 +119,7 @@ extern ExecuteFuncPtr mbExecuteFunction;                  //execute given functi
 
 extern mb_t mb_ds;                                        //modbus data structure
 uint8_t mbSetup(uint32_t baudrate=DEFAULT_BAUDRATE, uint8_t slaveId=DEFAULT_SLAVE_ID);
+*/
 
 #endif
+

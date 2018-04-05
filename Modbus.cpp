@@ -25,31 +25,31 @@ ReadFuncPtr mbReadBit = NULL;                             //Reading a bit value.
 ReadFuncPtr mbReadRegister = NULL;                        //Reading a register value.
 ExecuteFuncPtr mbExecuteFunction = NULL;                  //Execute non default functions
 //--------------------------------------------------------------------------------------
-mb_t mb_ds;                                               //modbus datastructure
+ModbusRTU mb_ds;                                          //modbus data structure
 //--------------------------------------------------------------------------------------
 ISR(TIMER0_COMPA_vect){                                   //interrupts for timer 0 compare trigger
-  if(mb_ds.silence_cnt<=mb_ds.silence_ticks)               //check if we have reached the limit
+  if(mb_ds.silence_cnt<=mb_ds.silence_ticks)              //check if we have reached the limit
     mb_ds.silence_cnt++;                                  //increment counter if not
 }                                                         //ignore timer otherwise
 //--------------------------------------------------------------------------------------
-uint8_t GetExpectedLength(){                              //return the expected length if checked against
+uint8_t ModbusRTU::GetExpectedLength(){                   //return the expected length if checked against
   uint8_t result = REQUEST_LENGTH;                        //default is REQUEST_LENGTH (8)
   if(mb_ds.msgFunc > 0){                                  //must be larger than 0
     if(mb_ds.msgFunc>=7){                                 //none of the 6 default functions
-                                                          //todo insert any special functions here, if necesarry
+                                                          //todo insert any special functions here, if necessary
     }                                                     //otherwise just return the REQUEST_LENGTH, as by default
   }else                                                   //if there's no function, there's no expected length.
     result=0;                                             //set to 0, try again later
   return result;                                          //return result;
 }  
 //--------------------------------------------------------------------------------------
-uint8_t InitSerial(uint32_t baudrate){                    //initialize serial 
+uint8_t ModbusRTU::InitSerial(uint32_t baudrate){         //initialize serial 
   uint8_t result=EXCEPTION_SLAVE_DEVICE_FAILURE;          //preset to failure
   uint16_t silenceTicks=0;                                //number of ticks used to trigger timer0 compare interrupt
   if((baudrate<BAUDRATE_MIN)||(baudrate>BAUDRATE_MAX))    //check if baud is within range
-    baudrate=DEFAULT_BAUDRATE;                            //if not, use default baudrate
+    baudrate=DEFAULT_BAUDRATE;                            //if not, use default baud-rate
   mb_ds.baudrate=baudrate;                                //save the baud
-  mb_ds.silence=(8750000/mb_ds.baudrate);                 //calc the silence period, 8 bit per 10 baud, 3.5 char length 
+  mb_ds.silence=(8750000/mb_ds.baudrate);                 //calculate the silence period, 8 bit per 10 baud, 3.5 char length 
   silenceTicks=mb_ds.silence;                             //use total silence ticks as base
   while(silenceTicks>255)                                 //create most precise 8 bit value
     silenceTicks=silenceTicks>>1;                         //by shifting to the right
@@ -67,7 +67,7 @@ uint8_t InitSerial(uint32_t baudrate){                    //initialize serial
   return result;                                          //true on success, failure resets to default
 }
 //--------------------------------------------------------------------------------------
-uint8_t mbSetup(uint32_t baudrate, uint8_t slaveId){      //modbus setup, using baud and slave id
+uint8_t ModbusRTU::mbSetup(uint32_t baudrate, uint8_t slaveId){      //modbus setup, using baud and slave id
   uint8_t result=0;                                       //on default return 0
   mb_ds.address.val=0;                                    //init address value to 0
   mb_ds.value.val=0;                                      //init value value to 0
@@ -79,7 +79,7 @@ uint8_t mbSetup(uint32_t baudrate, uint8_t slaveId){      //modbus setup, using 
   return result;                                          //return success of serial setup
 }
 //--------------------------------------------------------------------------------------
-void SendBuffer(uint8_t* buf,uint16_t len){               //sending of the actual buffer
+void ModbusRTU::SendBuffer(uint8_t* buf,uint16_t len){               //sending of the actual buffer
   union16_t crc;                                          //16 bit crc
   crc.val  = GetCrc16(buf,len-2);                         //get the crc of whatever we send
   buf[len-2]=crc.buf[0];                                  //set lsb
@@ -87,18 +87,18 @@ void SendBuffer(uint8_t* buf,uint16_t len){               //sending of the actua
   Serial.write(buf,len);                                  //push it out
 }                                                         
 //--------------------------------------------------------------------------------------
-void HandleException(uint8_t exceptionCode=0x01){         //set and send the buffer
+void ModbusRTU::HandleException(uint8_t exceptionCode=0x01){         //set and send the buffer
   mb_ds.msgFunc|=0x80;                                    //set the function to exception func
   mb_ds.msg[2]=exceptionCode;                             //set the given code into response
   SendBuffer(mb_ds.msg,0x05);                             //and send
 }
 //--------------------------------------------------------------------------------------
-uint8_t HandleBroadcast(){                                //handle a broadcasting message
+uint8_t ModbusRTU::HandleBroadcast(){                                //handle a broadcasting message
                                                           //todo take care of the broadcast message
   return EXCEPTION_NONE;                                  //default return this
 }
 //--------------------------------------------------------------------------------------
-uint8_t ReadRegisters(){                                  //read holding and input registers  
+uint8_t ModbusRTU::ReadRegisters(){                                  //read holding and input registers  
   if((mb_ds.value.val>0)&&(mb_ds.value.val<=READ_WORD_MAX)){    //check if the value is in range
     if(((mb_ds.address.val+mb_ds.value.val)<REQ_REGION_END)){   //check if the addresses are within range
       if(mbReadRegister!=NULL){                           //check if there is a register read function 
@@ -124,7 +124,7 @@ uint8_t ReadRegisters(){                                  //read holding and inp
   return EXCEPTION_INVALID_VALUE;                         //region out of range
 }
 //--------------------------------------------------------------------------------------
-uint8_t ReadBits(){  
+uint8_t ModbusRTU::ReadBits(){  
   if(mb_ds.value.val>0&&mb_ds.value.val<=READ_BIT_MAX){   //check if the value is in range   
     if(((mb_ds.address.val+mb_ds.value.val)<=REQ_REGION_END)){  //check if the addresses are within range
       if(mbReadBit!=NULL){                                //check if function has been set
@@ -157,7 +157,7 @@ uint8_t ReadBits(){
   return EXCEPTION_INVALID_VALUE;                         //return invalid value exception
 }
 //--------------------------------------------------------------------------------------
-uint8_t HandleMisc(){                                     //handling any non default functions
+uint8_t ModbusRTU::HandleMisc(){                                     //handling any non default functions
   switch(mb_ds.msgFunc){                                  //handle the received request
     default:                                              //by default use the following function pointer
       if(mbExecuteFunction!=NULL)                         //this function pointer
@@ -166,7 +166,7 @@ uint8_t HandleMisc(){                                     //handling any non def
   }
 }
 //--------------------------------------------------------------------------------------
-uint8_t HandleRequest(){                                  //handling a complete request
+uint8_t ModbusRTU::HandleRequest(){                                  //handling a complete request
   uint8_t result=EXCEPTION_NONE;                          //default is success
   if(mb_ds.msgSlave==0){                                  //message for everyone? (including me)
     if(CheckCrc(mb_ds.msg,mb_ds.msgPtr))                  //check crc
@@ -232,9 +232,9 @@ void serialEvent() {
         mb_ds.msg[mb_ds.msgPtr]=Serial.read();            //put data into buffer
         mb_ds.msgPtr++;                                   //increment counter
         if(mb_ds.expectedLength==0)                       //keep reading if expected length is unknown
-          mb_ds.expectedLength=GetExpectedLength();       //set expected length
+          mb_ds.expectedLength=mb_ds.GetExpectedLength();       //set expected length
         if(mb_ds.msgPtr==mb_ds.expectedLength){           //is there a complete request
-          HandleRequest();                                //handle it          
+          mb_ds.HandleRequest();                                //handle it          
           ignore=true;                                    //ignore leftovers
         }
       }
@@ -245,5 +245,6 @@ void serialEvent() {
     mb_ds.msgPtr=0;                                       //reset buffer  
     mb_ds.expectedLength=0;                               //default expected length value          
   }
-}                                                    
+}
 //--------------------------------------------------------------------------------------
+
