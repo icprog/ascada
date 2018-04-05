@@ -19,11 +19,11 @@
 #define READ_WORD_MAX 0x10                                //max 16 registers (Words) read ((MESSAGE_LENGTH - 8) / 2)
 #define READ_BIT_MAX 0x100                                //max 128 bits read, fits easilly in MESSAGE_LENGTH
 //--------------------------------------------------------------------------------------
-WriteFuncPtr mbWriteBit = NULL;                           //Writing a bit value.
-WriteFuncPtr mbWriteRegister = NULL;                      //Writing a register value.
-ReadFuncPtr mbReadBit = NULL;                             //Reading a bit value.
-ReadFuncPtr mbReadRegister = NULL;                        //Reading a register value.
-ExecuteFuncPtr mbExecuteFunction = NULL;                  //Execute non default functions
+//WriteFuncPtr WriteBit = NULL;                           //Writing a bit value.
+//WriteFuncPtr WriteRegister = NULL;                      //Writing a register value.
+//ReadFuncPtr ReadBit = NULL;                             //Reading a bit value.
+//ReadFuncPtr ReadRegister = NULL;                        //Reading a register value.
+//ExecuteFuncPtr ExecuteFunction = NULL;                  //Execute non default functions
 //--------------------------------------------------------------------------------------
 mb_t mb_ds;                                               //modbus datastructure
 //--------------------------------------------------------------------------------------
@@ -101,13 +101,13 @@ uint8_t HandleBroadcast(){                                //handle a broadcastin
 uint8_t ReadRegisters(){                                  //read holding and input registers  
   if((mb_ds.value.val>0)&&(mb_ds.value.val<=READ_WORD_MAX)){    //check if the value is in range
     if(((mb_ds.address.val+mb_ds.value.val)<REQ_REGION_END)){   //check if the addresses are within range
-      if(mbReadRegister!=NULL){                           //check if there is a register read function 
+      if(mb_ds.ReadRegister!=NULL){                           //check if there is a register read function 
         uint8_t result=EXCEPTION_NONE;                    //return value
         union16_t data;                                   //data container        
         uint8_t cnt=0;                                    //keeping track of address            
         mb_ds.msg[2] = mb_ds.value.val*2;                 //set number of bytes
         for(uint8_t i=0;i<mb_ds.msg[2];i=i+2){            //walk through all the addresses        
-          result=(*mbReadRegister)(mb_ds.address.val+cnt,&(data.val));
+          result=(*(mb_ds.ReadRegister))(mb_ds.address.val+cnt,&(data.val));
           if(result==EXCEPTION_NONE){                     //successfully read some data
             mb_ds.msg[3+i]=data.buf[1];                   //pop the lsb in
             mb_ds.msg[3+i+1]=data.buf[0];                 //pop the msb in     
@@ -127,7 +127,7 @@ uint8_t ReadRegisters(){                                  //read holding and inp
 uint8_t ReadBits(){  
   if(mb_ds.value.val>0&&mb_ds.value.val<=READ_BIT_MAX){   //check if the value is in range   
     if(((mb_ds.address.val+mb_ds.value.val)<=REQ_REGION_END)){  //check if the addresses are within range
-      if(mbReadBit!=NULL){                                //check if function has been set
+      if(mb_ds.ReadBit!=NULL){                                //check if function has been set
         uint8_t result=EXCEPTION_NONE;                    //keeping track of result
         uint16_t data=0;                                  //temp var for data read
         uint8_t n=0;                                      //byte counter
@@ -140,7 +140,7 @@ uint8_t ReadBits(){
             n++;                                          //increment byte counter
             mb_ds.msg[3+n] = 0;                           //reset the byte to 0
           }                                                 
-          result=(*mbReadBit)(mb_ds.address.val+i,&data); //request a bit value
+          result=(*(mb_ds.ReadBit))(mb_ds.address.val+i,&data); //request a bit value
           if(result==EXCEPTION_NONE){                     //on success
             if(data!=0)                                   //and if it's set
               mb_ds.msg[3+n] |= 1<<(i%8);                 //put it into the byte if set          
@@ -160,8 +160,8 @@ uint8_t ReadBits(){
 uint8_t HandleMisc(){                                     //handling any non default functions
   switch(mb_ds.msgFunc){                                  //handle the received request
     default:                                              //by default use the following function pointer
-      if(mbExecuteFunction!=NULL)                         //this function pointer
-        return (*mbExecuteFunction)(mb_ds.msgFunc);       //and call it, returning the result of the function  
+      if(mb_ds.ExecuteFunction!=NULL)                         //this function pointer
+        return (*(mb_ds.ExecuteFunction))(mb_ds.msgFunc);       //and call it, returning the result of the function  
       return EXCEPTION_INVALID_FUNCTION;                  //otherwise return not available
   }
 }
@@ -190,16 +190,16 @@ uint8_t HandleRequest(){                                  //handling a complete 
               result=ReadRegisters();                     //read the requested registers
               break;                                      //and done
             case 5:                                       //write coil (bit)      
-              if(mbWriteBit!=NULL){                       //is function set, then write
-                result=(*mbWriteBit)(mb_ds.address.val,mb_ds.value.val); 
+              if(mb_ds.WriteBit!=NULL){                   //is function set, then write
+                result=(*(mb_ds.WriteBit))(mb_ds.address.val,mb_ds.value.val); 
                 if(result==EXCEPTION_NONE)                //on success
                   SendBuffer(mb_ds.msg,mb_ds.msgPtr);     //send the buffer
               }else                                       //otherwise, return failure
                 result=EXCEPTION_SLAVE_DEVICE_FAILURE;    //can't execute, slave error
               break;                                      //and done
             case 6:                                       //write holding register (word)
-              if(mbWriteRegister!=NULL){                  //check me writing bits function
-                result=(*mbWriteRegister)(mb_ds.address.val,mb_ds.value.val);
+              if(mb_ds.WriteRegister!=NULL){                  //check me writing bits function
+                result=(*(mb_ds.WriteRegister))(mb_ds.address.val,mb_ds.value.val);
                 if(result==EXCEPTION_NONE)                //on success
                   SendBuffer(mb_ds.msg,mb_ds.msgPtr);     //return the request
               }else                                       //otherwise the writing bit function hasn't been set
