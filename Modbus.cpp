@@ -19,16 +19,10 @@
 #define READ_WORD_MAX 0x10                                //max 16 registers (Words) read ((MESSAGE_LENGTH - 8) / 2)
 #define READ_BIT_MAX 0x100                                //max 128 bits read, fits easilly in MESSAGE_LENGTH
 //--------------------------------------------------------------------------------------
-//WriteFuncPtr WriteBit = NULL;                           //Writing a bit value.
-//WriteFuncPtr WriteRegister = NULL;                      //Writing a register value.
-//ReadFuncPtr ReadBit = NULL;                             //Reading a bit value.
-//ReadFuncPtr ReadRegister = NULL;                        //Reading a register value.
-//ExecuteFuncPtr ExecuteFunction = NULL;                  //Execute non default functions
-//--------------------------------------------------------------------------------------
 mb_t mb_ds;                                               //modbus datastructure
 //--------------------------------------------------------------------------------------
 ISR(TIMER0_COMPA_vect){                                   //interrupts for timer 0 compare trigger
-  if(mb_ds.silence_cnt<=mb_ds.silence_ticks)               //check if we have reached the limit
+  if(mb_ds.silence_cnt<=mb_ds.silence_ticks)              //check if we have reached the limit
     mb_ds.silence_cnt++;                                  //increment counter if not
 }                                                         //ignore timer otherwise
 //--------------------------------------------------------------------------------------
@@ -75,7 +69,7 @@ uint8_t mbSetup(uint32_t baudrate, uint8_t slaveId){      //modbus setup, using 
     slaveId=DEFAULT_SLAVE_ID;                             //set to default slave id
   mb_ds.slaveId=slaveId;                                  //set slave id  
   result=InitSerial(baudrate);                            //and set the baudrate to the given value
-  TIMSK0 |= _BV(OCIE0A);                                  //couple timer 0 compare interrupt
+  TIMSK0|=_BV(OCIE0A);                                    //couple timer 0 compare interrupt
   return result;                                          //return success of serial setup
 }
 //--------------------------------------------------------------------------------------
@@ -160,8 +154,8 @@ uint8_t ReadBits(){
 uint8_t HandleMisc(){                                     //handling any non default functions
   switch(mb_ds.msgFunc){                                  //handle the received request
     default:                                              //by default use the following function pointer
-      if(mb_ds.ExecuteFunction!=NULL)                         //this function pointer
-        return (*(mb_ds.ExecuteFunction))(mb_ds.msgFunc);       //and call it, returning the result of the function  
+      if(mb_ds.ExecuteFunction!=NULL)                     //this function pointer
+        return (*(mb_ds.ExecuteFunction))(mb_ds.msgFunc,NULL);       //and call it, returning the result of the function  
       return EXCEPTION_INVALID_FUNCTION;                  //otherwise return not available
   }
 }
@@ -191,7 +185,7 @@ uint8_t HandleRequest(){                                  //handling a complete 
               break;                                      //and done
             case 5:                                       //write coil (bit)      
               if(mb_ds.WriteBit!=NULL){                   //is function set, then write
-                result=(*(mb_ds.WriteBit))(mb_ds.address.val,mb_ds.value.val); 
+                result=(*(mb_ds.WriteBit))(mb_ds.address.val,&(mb_ds.value.val)); 
                 if(result==EXCEPTION_NONE)                //on success
                   SendBuffer(mb_ds.msg,mb_ds.msgPtr);     //send the buffer
               }else                                       //otherwise, return failure
@@ -199,7 +193,7 @@ uint8_t HandleRequest(){                                  //handling a complete 
               break;                                      //and done
             case 6:                                       //write holding register (word)
               if(mb_ds.WriteRegister!=NULL){                  //check me writing bits function
-                result=(*(mb_ds.WriteRegister))(mb_ds.address.val,mb_ds.value.val);
+                result=(*(mb_ds.WriteRegister))(mb_ds.address.val,&(mb_ds.value.val));
                 if(result==EXCEPTION_NONE)                //on success
                   SendBuffer(mb_ds.msg,mb_ds.msgPtr);     //return the request
               }else                                       //otherwise the writing bit function hasn't been set
@@ -217,7 +211,7 @@ uint8_t HandleRequest(){                                  //handling a complete 
   return result;                                          //return result, 0 == success
 }     
 //--------------------------------------------------------------------------------------
-void serialEvent() {
+void mbSerialEvent() {
   bool ignore=(mb_ds.silence_cnt>mb_ds.silence_ticks)&&(mb_ds.msgPtr>0);              
   if(ignore){                                             //on ignore reset the buffer
     mb_ds.msgPtr=0;                                       //reset buffer  
