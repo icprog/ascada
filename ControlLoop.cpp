@@ -2,6 +2,7 @@
 #include "ControlLoop.h"
 #include "Modbus.h"
 #include "Project.h"
+#include "Exceptions.h"
 #include "Arduino.h"
 #include <EEPROM.h>
 //--------------------------------------------------------------------------------------      
@@ -37,6 +38,9 @@ uint8_t clSetup()
   else
     mbSetup(DEFAULT_BAUDRATE, DEFAULT_SLAVE_ID);  
 
+  if(!cl_ds.isRunning)
+    prSetup();
+    
   return EXCEPTION_NONE;
 }
 //--------------------------------------------------------------------------------------
@@ -55,7 +59,11 @@ uint8_t clStart()
     {
       cl_ds.halted=HALTED_NONE;
       cl_ds.isRunning=true;
-      result=EXCEPTION_NONE;
+      result=prSetup();  
+      if(result!=EXCEPTION_NONE)
+      {
+         clStop();                         
+      }
     }
   }
   return result;
@@ -174,10 +182,8 @@ uint8_t WriteFuncCoil(uint16_t address,uint16_t* value)
       case 0x0000:
         result=clStart();
         if ((result==EXCEPTION_NONE)&&cl_ds.defaultOffline)
-        {
           if (ConfigFromEeprom(0, MB_SETTING_SIZE, mb_ds.settings))
             mbSetup(mb_ds.baudrate, mb_ds.slaveId);
-        }
         break;
       case 0x0001:
         result=clPause();
@@ -197,12 +203,9 @@ uint8_t HandleModbusRead(uint16_t address, uint16_t* value)
   for(uint16_t i=0;i<MB_CNT;i++)
   {
     PROGRAM_READTYPE (&mbMapping [i], target);
-    if(target.isRead && target.regStart<=address)
-    {
-      if(address<(target.regStart+target.regCnt)){      
-        return (*(target.funcPtr))(address-target.regStart,value);    
-      }    
-    }
+    if(target.isRead && target.regStart<=address)    
+      if(address<(target.regStart+target.regCnt))
+        return (*(target.funcPtr))(address-target.regStart,value);        
   }
   return EXCEPTION_INVALID_ADDRESS;
 }
@@ -214,11 +217,8 @@ uint8_t HandleModbusWrite(uint16_t address, uint16_t* value)
   {
     PROGRAM_READTYPE (&mbMapping [i], target);
     if(!target.isRead && target.regStart<=address)
-    {
-      if(address<(target.regStart+target.regCnt)){      
-        return (*(target.funcPtr))(address-target.regStart,value);    
-      }    
-    }
+      if(address<(target.regStart+target.regCnt))     
+        return (*(target.funcPtr))(address-target.regStart,value);
   }
   return EXCEPTION_INVALID_ADDRESS;
 }
