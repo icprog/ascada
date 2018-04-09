@@ -3,23 +3,8 @@
 
 	#include <stdint.h>
 	#include "Arduino.h"
-
-	#define VDATE "Apr 03 2018"                               //__DATE__ //"Apr 03 2018"
-	#define VTIME "12:14:23"                                  //__TIME__ //"12:14:23"
-
-	#define EXCEPTION_NONE 0x00                               //no exception present
-	#define EXCEPTION_INVALID_FUNCTION 0x01                   //invalid function code in request
-	#define EXCEPTION_INVALID_ADDRESS 0x02                    //invalid address in request
-	#define EXCEPTION_INVALID_VALUE 0x03                      //invalid value in request, depends upon value usage
-	#define EXCEPTION_SLAVE_DEVICE_FAILURE 0x04               //failure when executing request
-	#define EXCEPTION_ACKNOWLEDGE 0x05                        //received request, couldn't finish on time
-	#define EXCEPTION_SLAVE_DEVICE_BUSY 0x06                  //can't execute request at the moment
-	#define EXCEPTION_NEGATIVE_ACKNOWLEDGE 0x07               //can't acknowledge request
-	#define EXCEPTION_NOT_RUNNING 0x08                        //can't do stuff, because not in run
-
-	#define MAGIC_NUMBER 0xC369                               //eeprom value used to check if eeprom is set
-	#define MAGIC_ADDRESS 0x00                                //eeprom address to read
-
+	#include "ProjectDefines.h"
+  
 	#define SET_REGISTER(addr,value) ((*(volatile uint8_t *)addr)=value)
 	#define GET_REGISTER(addr) (*(volatile uint8_t *)addr)    //return register value  
 
