@@ -2,7 +2,8 @@
 #include "Tools.h"
 #include <EEPROM.h>
 //--------------------------------------------------------------------------------------
-bool CheckCrc(uint8_t* buf, uint16_t len){
+bool CheckCrc(uint8_t* buf, uint16_t len)
+{
   uint16_t crc = GetCrc16(buf,len-2);
   uint16_t oldCrc = buf[len-1];
   oldCrc = (oldCrc << 8) + buf[len-2];
@@ -12,10 +13,13 @@ bool CheckCrc(uint8_t* buf, uint16_t len){
 uint16_t GetCrc16(uint8_t* buf, uint16_t len)
 {
   uint16_t crc = 0xFFFF;  
-  for (uint16_t pos = 0; pos < len; pos++) {
+  for (uint16_t pos = 0; pos < len; pos++) 
+	{
     crc ^= (uint16_t)buf[pos];          
-    for (uint16_t i = 8; i != 0; i--) {  
-      if ((crc & 0x0001) != 0) {      
+    for (uint16_t i = 8; i != 0; i--) 
+		{  
+      if ((crc & 0x0001) != 0) 
+			{      
         crc >>= 1;                    
         crc ^= 0xA001;
       }else                            
@@ -27,8 +31,10 @@ uint16_t GetCrc16(uint8_t* buf, uint16_t len)
 //--------------------------------------------------------------------------------------
 bool ReadEeprom(uint16_t start, uint16_t cnt, uint8_t* buf)
 {
-  if((start<=E2END) && (cnt>0 && cnt <=E2END) && ((start+cnt)<=E2END)){
-    for(uint16_t i=0;i<cnt;i++){
+  if((start<=E2END) && (cnt>0 && cnt <=E2END) && ((start+cnt)<=E2END))
+	{
+    for(uint16_t i=0;i<cnt;i++)
+		{
       buf[i]=EEPROM.read(start);
       start++;
     }
@@ -39,8 +45,10 @@ bool ReadEeprom(uint16_t start, uint16_t cnt, uint8_t* buf)
 //--------------------------------------------------------------------------------------
 bool WriteEeprom(uint16_t start, uint16_t cnt, uint8_t* buf)
 {
-  if((start<=E2END) && (cnt>0 && cnt <=E2END) && ((start+cnt)<=E2END)){
-    for(uint16_t i=0;i<cnt;i++){
+  if((start<=E2END) && (cnt>0 && cnt <=E2END) && ((start+cnt)<=E2END))
+	{
+    for(uint16_t i=0;i<cnt;i++)
+		{
       EEPROM.write(start,buf[i]);
       start++;
     }
