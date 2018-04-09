@@ -26,24 +26,32 @@
 	#define MB_MAP_FULL(regStart, regCnt, funcPtr, isRead) {regStart,regCnt,funcPtr,isRead}
 	#define MB_READ_RANGE(regStart,regCnt,funcPtr) MB_MAP_FULL(regStart,regCnt,funcPtr,true)
 	#define MB_WRITE_RANGE(regStart,regCnt,funcPtr) MB_MAP_FULL(regStart,regCnt,funcPtr,false)
-	#define MB_WRITE(regstart,funcPtr) MB_WRITE_RANGE(regstart,1,funcPtr)
+	#define MB_WRITE(regStart,funcPtr) MB_WRITE_RANGE(regStart,1,funcPtr)
 	#define MB_READ(regStart,funcPtr) MB_READ_RANGE(regStart,1,funcPtr)
+
+  template <typename T> void PROGRAM_READTYPE (const T * sce, T& dest)
+  {
+    memcpy_P (&dest, sce, sizeof (T));
+  }
 
 	typedef uint8_t (*ModbusFuncPtr)(uint16_t address,uint16_t* value);
 
-	typedef struct{  
+	typedef struct
+	{
 		uint16_t regStart;
 		uint16_t regCnt;
 		ModbusFuncPtr funcPtr;
 		bool isRead;  
 	} modbusMapping_t;  
 
-	typedef union{
+	typedef union
+	{
 		uint8_t buf[2];
 		uint16_t val=0;
 	} union16_t;
 
-	typedef union{
+	typedef union
+	{
 		uint8_t buf[4];
 		uint32_t val;
 	} union32_t;
