@@ -12,7 +12,7 @@
 
   //#define 
   
-  #define GPIO_CNT                        0x17
+  #define GPIO_CNT                        0x15
 
   #define GPIO_INPUT                      0x01
   #define GPIO_INPUT_LOW                  GPIO_INPUT
