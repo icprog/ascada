@@ -7,6 +7,7 @@
 #include <EEPROM.h>                                       //used in gathering input registers
 #include "Arduino.h"                                      //used for serial functions
 #include "Modbus.h"                                       //header for the outside world
+#include "Exceptions.h"                                   //header containing exception codes
 //--------------------------------------------------------------------------------------
 #define REQ_REGION_START (REGION_START[mb_ds.msgFunc-1])  //return the region coupled with the function
 #define REQ_REGION_END (REQ_REGION_START+REGION_RANGE)    //return the end of the region coupled with the function
