@@ -1,12 +1,3 @@
-//      Author: bolke
-//      Date: 20-01-2018
-//      Description: Code for acting like a modbus slave. Use default modbus functions to
-//                   read and write to and from the arduino. Set outputs, read inputs,
-//                   read analogs, etc. 
-//                   Couple your own functions for reading and writing through the function pointers.
-//                   These functions will be given the translated addresses (holding register or input
-//                   register, etc.
-
 #ifndef MODBUS_H
 	#define MODBUS_H
 
@@ -69,5 +60,7 @@
 	extern mb_t mb_ds;                                        //modbus data structure
 	uint8_t mbSetup(uint32_t baudrate=DEFAULT_BAUDRATE, uint8_t slaveId=DEFAULT_SLAVE_ID);
 	void mbSerialEvent();
+	void mbTimerEvent();
 
 #endif
+
