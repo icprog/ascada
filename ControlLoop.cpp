@@ -38,15 +38,29 @@ uint8_t clSetup()
   else
     mbSetup(DEFAULT_BAUDRATE, DEFAULT_SLAVE_ID);  
 
-  if(!cl_ds.isRunning)
-    prSetup();
+  if(!cl_ds.isRunning){
+    prInitOfflineGpioDef();
+    prOfflineGpio();
+  }
     
   return EXCEPTION_NONE;
 }
 //--------------------------------------------------------------------------------------
+bool clDetectAlarms()
+{  
+  for(uint16_t i=0;i<ALARM_WORD_CNT;i++)
+  {
+    if(pr_ds.alarms[i]!=0){
+      return true;
+      break;
+    }
+  }
+  return false;
+}
+//--------------------------------------------------------------------------------------
 uint8_t clLoop()
 {
-	//loop the project
+  cl_ds.hasAlarms=clDetectAlarms();  
   return 0;
 }
 //--------------------------------------------------------------------------------------
@@ -59,30 +73,35 @@ uint8_t clStart()
     {
       cl_ds.halted=HALTED_NONE;
       cl_ds.isRunning=true;
-      result=prSetup();  
+      prInitOnlineGpioDef();
+      result=prOnlineGpio();
       if(result!=EXCEPTION_NONE)
-      {
-         clStop();                         
-      }
+         clStop();                               
     }
   }
   return result;
 }
 //--------------------------------------------------------------------------------------
 uint8_t clStop()
-{
+{ 
+  uint8_t result=EXCEPTION_NEGATIVE_ACKNOWLEDGE;
+   
   if(cl_ds.isRunning)
 	{    
     cl_ds.isRunning=false;
     cl_ds.halted=HALTED_STOPPED;      
-    return EXCEPTION_NONE;
+    result=EXCEPTION_NONE;
   }
 	else if(cl_ds.halted==HALTED_PAUSED)
 	{
     cl_ds.halted=HALTED_STOPPED;
-    return EXCEPTION_NONE;
+    result=EXCEPTION_NONE;
   }
-  return EXCEPTION_NEGATIVE_ACKNOWLEDGE;  
+  
+  prInitOfflineGpioDef();
+  prOfflineGpio();
+  
+  return result;  
 }
 //--------------------------------------------------------------------------------------
 uint8_t clPause()
@@ -90,7 +109,9 @@ uint8_t clPause()
   if(cl_ds.isRunning)
 	{    
     cl_ds.isRunning=false;
-    cl_ds.halted=HALTED_PAUSED;      
+    cl_ds.halted=HALTED_PAUSED;
+    prInitOfflineGpioDef();
+    prOfflineGpio();      
     return EXCEPTION_NONE;
   }  
   return EXCEPTION_NEGATIVE_ACKNOWLEDGE;  
@@ -227,3 +248,10 @@ void serialEvent()
 {
   mbSerialEvent();
 }
+//--------------------------------------------------------------------------------------     
+ISR(TIMER0_COMPA_vect)
+{
+  mbTimerEvent();
+}
+//--------------------------------------------------------------------------------------
+
