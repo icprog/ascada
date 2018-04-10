@@ -9,8 +9,6 @@
 
   #define ALARM_WORD_CNT 0x10
   #define ALARM_BIT_CNT (ALARM_WORD_CNT*16)
-
-  //#define 
   
   #define GPIO_CNT                        0x15
 
@@ -20,6 +18,9 @@
   #define GPIO_OUTPUT                     0x03
   #define GPIO_OUTPUT_LOW                 GPIO_OUTPUT
   #define GPIO_OUTPUT_HIGH                0x04
+  #define GPIO_INPUT_ANALOG               0x05
+  #define GPIO_OUTPUT_ANALOG              0x06
+  #define GPIO_SPECIAL                    0x07
   
   #define GPIO_DEFAULT                    GPIO_INPUT_HIGH  
 
