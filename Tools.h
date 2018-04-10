@@ -54,3 +54,4 @@
 	uint8_t CheckResetRegister();
 
 #endif
+
