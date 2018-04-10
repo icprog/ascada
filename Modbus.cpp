@@ -1,8 +1,3 @@
-//      Author: bolke
-//      Date: 20-01-2018
-//      Description: Code for acting like a modbus slave. Use default modbus functions to
-//                   read and write to and from the arduino. Set outputs, read inputs,
-//                   read analogs, etc. 
 //--------------------------------------------------------------------------------------
 #include <EEPROM.h>                                       //used in gathering input registers
 #include "Arduino.h"                                      //used for serial functions
@@ -21,11 +16,6 @@
 #define READ_BIT_MAX 0x100                                //max 128 bits read, fits easilly in MESSAGE_LENGTH
 //--------------------------------------------------------------------------------------
 mb_t mb_ds;                                               //modbus datastructure
-//--------------------------------------------------------------------------------------
-ISR(TIMER0_COMPA_vect){                                   //interrupts for timer 0 compare trigger
-  if(mb_ds.silence_cnt<=mb_ds.silence_ticks)              //check if we have reached the limit
-    mb_ds.silence_cnt++;                                  //increment counter if not
-}                                                         //ignore timer otherwise
 //--------------------------------------------------------------------------------------
 uint8_t GetExpectedLength(){                              //return the expected length if checked against
   uint8_t result = REQUEST_LENGTH;                        //default is REQUEST_LENGTH (8)
@@ -212,6 +202,11 @@ uint8_t HandleRequest(){                                  //handling a complete 
   return result;                                          //return result, 0 == success
 }     
 //--------------------------------------------------------------------------------------
+void mbTimerEvent() {                                     //interrupts for timer 0 compare trigger
+  if(mb_ds.silence_cnt<=mb_ds.silence_ticks)              //check if we have reached the limit
+    mb_ds.silence_cnt++;                                  //increment counter if not
+}                                                         //ignore timer otherwise
+//--------------------------------------------------------------------------------------
 void mbSerialEvent() {
   bool ignore=(mb_ds.silence_cnt>mb_ds.silence_ticks)&&(mb_ds.msgPtr>0);              
   if(ignore){                                             //on ignore reset the buffer
@@ -242,3 +237,4 @@ void mbSerialEvent() {
   }
 }                                                    
 //--------------------------------------------------------------------------------------
+
