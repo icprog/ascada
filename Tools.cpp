@@ -96,3 +96,4 @@ bool ConfigToEeprom(uint16_t start,uint16_t cnt, uint8_t* buf)
   return WriteEeprom(GetConfigStart() + start,cnt,buf);  
 }
 //--------------------------------------------------------------------------------------
+
